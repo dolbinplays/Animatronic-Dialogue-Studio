@@ -1,47 +1,48 @@
 # Animatronic Dialogue Studio
 
-**v0.1 — Android source prototype (Android 8.0+, API 26).** This first build is a proof of concept, not yet hardware-tested.
+**v0.2 — Android networking test build (Android 8.0+).** Native Android app for a Director, multiple Performer devices, and an Audience device. Hardware timing has not yet been validated.
 
-## Features
+## Changes in v0.2
 
-- Director, Performer, and Audience roles in a single native Android app.
-- Local Director TCP server on port 48271; clients join on the same Wi-Fi/hotspot network.
-- Simple `Character|dialogue` script lines and Android text-to-speech playback.
-- Basic animated skull, opening jaw and red eyes while dialogue is playing.
-- Test and Stop controls.
+- Director displays detected IPv4 addresses and local TCP server status on port **48271**.
+- Performer and Audience can tap **Find Director Automatically**. On a direct hotspot it tries the Wi-Fi gateway, followed by UDP local-network discovery on port **48272**.
+- Devices use the Wi-Fi network explicitly for outgoing connections, even if Android prefers cellular for Internet access.
+- Manual Director IP entry remains available where broadcasts are restricted.
+- Peers identify themselves to the Director on connection, with clearer diagnostic/status messages.
+- The incorrect prefilled `192.168.43.1` guess has been removed.
 
-## Download the test APK
+## Test on two phones
 
-Go to [GitHub Actions](../../actions), open the latest **Build Android Debug APK** run, and download the `AnimatronicDialogueStudio-v0.1-debug-apk` artifact. Unzip it to obtain `app-debug.apk`. Install it on Android phones by enabling installation from your trusted files app when prompted. This is a debug test APK, **not** a Play Store release.
+1. Install the APK on both phones. Enable a hotspot on the Director phone; join it from the Performer phone. You can also connect both to the same Wi-Fi router.
+2. On the Director, select **Director**, assign **Skeleton**, tap **START DIRECTOR / JOIN BY ADDRESS**, and check the **DIRECTOR READY** message. The phone shows its possible local IP addresses.
+3. On the Performer, select **Performer**, assign **Spirit Ball**, tap **FIND DIRECTOR AUTOMATICALLY**.
+4. If it says CONNECTED TO DIRECTOR, tap PLAY SCRIPT on the Director. Each character should speak its own line.
+5. If discovery fails, enter the Director's actual local IP address manually, then tap **START DIRECTOR / JOIN BY ADDRESS**. On a phone hotspot, the Performer's Wi-Fi gateway is usually the Director; on a router, the gateway is normally the router, not the Director.
+6. Use **TEST MY CHARACTER** to check local TTS and skull animation. Keep the app in the foreground for this prototype.
 
-The workflow uses JDK 17, Gradle 8.7, and Android SDK 35. The workflow has to succeed before an APK can be downloaded.
+The Director does **not** enable the hotspot for you. Enable hotspot from Android settings.
 
-## Try it
+## Download
 
-1. Install the same APK on both Android phones.
-2. Enable a hotspot on the Director device, or join both devices to the same Wi-Fi network (offline operation).
-3. On the Director, select **Director** and **Start Director / Join Director**.
-4. On the other phone, select **Performer**, select **Spirit Ball** (or another character), enter the actual IP address of the Director phone, then tap **Start Director / Join Director**. The prefilled IP is only an example.
-5. Use **Test My Character** on either phone to check audio/skull movement.
-6. On the Director, enter lines such as `Skeleton|Hello!` and `Spirit Ball|Boo!` and press **Play Script (Director)**.
-7. An **Audience** phone plays every script line locally. Bluetooth audio routing depends on Android and the paired speaker.
+Open the latest successful [Build Android Debug APK workflow](../../actions/workflows/build-android.yml). Under **Artifacts**, download `AnimatronicDialogueStudio-v0.2-debug-apk`; extract `app-debug.apk` and install it on your phones.
 
-## Known limitations
+## Current features
 
-- **Not yet precision synchronized.** Current scripts broadcast each turn and estimate its duration, with no clock calibration or audio preloading.
-- Jaw animation is time-based, not yet measured from actual audio amplitude; eyes light up during speaking.
-- Android system TTS voices/speech speed may differ across phones.
-- No audio import, music/effects, fully mixed outdoor soundtrack, saved scripts, automated pairing, QR code, or Wi-Fi recovery yet.
-- Keep the app in the foreground while testing; background playback services are not included.
-- No authentication or encryption; only use on a private/trusted local network.
-- Some prepaid phones may restrict hotspot use without a plan. A separate Wi-Fi router is an alternative.
-- The app itself does not enable Android hotspot; enable it in phone settings.
-- SDK target is deliberately 28 for this local prototype; this must be modernized before wider distribution.
+- Director/Performer/Audience role selection; remote dialogue commands via local TCP.
+- Example `Character|dialogue` text script lines; Android text-to-speech.
+- Simple animated skull with moving jaw and red eyes.
+- Connection diagnostics, auto-find on compatible Wi-Fi/hotspots, and manual IP fallback.
 
-## Build locally
+## Current limitations
 
-Open the repository root (the directory containing `settings.gradle`) with Android Studio and allow Gradle sync. Select **Build > Build APK(s)**, or run `gradle assembleDebug` with JDK 17 and Android SDK 35 / Gradle 8.7.
+- **This remains a test prototype.** Dialogue timing is approximate, not synchronized to an authoritative audio timeline. Jaw motion is simulated rather than sampled from audio.
+- No automatic reconnect, timed sound effects, audio imports, full audience soundtrack, secure pairing, or persistent background service.
+- Director discovery may fail on Wi-Fi networks with device isolation or broadcast restrictions. Even manual IP won't fix networks that forbid client-to-client connections.
+- The app uses unencrypted local commands without authentication. Use only a private, trusted Wi-Fi network.
+- The app targets Android API 28 for local compatibility; target SDK and background behavior need modernization before wider distribution.
 
-## Project scope
+## Build
 
-This is the separate Halloween animatronics project. The Project Aegis repository is not part of this build.
+GitHub Actions uses Java 17, Gradle 8.7 and Android SDK 35 to compile and upload a debug APK. Android Studio can also open this repository directly.
+
+Project Aegis is unrelated and remains untouched.
